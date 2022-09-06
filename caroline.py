@@ -9,8 +9,6 @@ from asciimatics.widgets import (
     PopUpDialog,
     Text,
     Divider,
-    DropdownList,
-    Button,
     ListBox,
 )
 from asciimatics.scene import Scene
@@ -38,9 +36,9 @@ class Caroline(Frame):
         self.add_layout(layout)
 
         # Hierarchical tree of data
-        log_lister = LogLister("output.txt")
+        self.log_lister = LogLister("output.txt")
 
-        self._data = log_lister.generate_data()
+        self._data = self.log_lister.generate_data()
 
         self._list = ListBox(
             Widget.FILL_FRAME,
@@ -71,18 +69,9 @@ class Caroline(Frame):
         pass
 
     def _edit(self):
-        pass
-
-    def popup(self):
-        # Just confirm whenever the user actually selects something.
-        self._scene.add_effect(
-            PopUpDialog(
-                self._screen, "You selected: {}".format(self._list.value), ["OK"]
-            )
-        )
-
-    def details(self):
-        self._details.value = "--"
+        # Find the line number and toggle its children
+        self._list.options = self.log_lister.find_node_toggle_collapse(
+            self._list.value)
 
     def process_event(self, event):
         # Do the key handling for this Frame.
@@ -103,7 +92,8 @@ def start_app(screen, old_scene):
 last_scene = None
 while True:
     try:
-        Screen.wrapper(start_app, catch_interrupt=False, arguments=[last_scene])
+        Screen.wrapper(start_app, catch_interrupt=False,
+                       arguments=[last_scene])
         sys.exit(0)
     except ResizeScreenError as e:
         last_scene = e.scene
