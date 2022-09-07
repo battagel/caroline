@@ -3,28 +3,67 @@ class LogLister:
 
     def __init__(self, path):
         self.path = path
+        self.create_tree()
 
     def generate_data(self):
+        """
+        Formats the tree into strings with line numbers
+        Parameters:
+            None
+        Exception:
+            None
+        Returns:
+            List of tuples
+        """
+        data_list = self.genesis.compile_tree()[0]
+        tuple_list = self._data_to_tuple(data_list)
+        return tuple_list
+
+    def create_tree(self):
+        """
+        Creates a genesis Node in which the tree is stored
+        Parameters:
+            None
+        Exception:
+            None
+        Returns:
+            None
+        """
         log_file = open(self.path, "r")
         line_list = log_file.readlines()
-
         self.genesis = Node("File", 0)
         self.genesis.get_children(line_list)
 
-        self.data_list = self.genesis.compile_tree()[0]
-
-        return self._data_to_tuple(self.data_list)
-
     def find_node_toggle_collapse(self, index):
+        """
+        Parameters:
+            Index of node to be collapsed
+        Exception:
+            None
+        Returns:
+            New list of tuples with collapsed node
+        """
         self.genesis.find_node(index)
         new_data = self.genesis.compile_tree()[0]
-        return self._data_to_tuple(new_data)
+        tuple_list = self._data_to_tuple(new_data)
+        return tuple_list
 
     def print_data(self, data):
+        """
+        Debug method for printing a list
+        """
         for line in data:
             print(line[0])
 
     def _data_to_tuple(self, data):
+        """
+        Parameters:
+            data: List of formatted strings which displays the tree
+        Exception:
+            None
+        Returns:
+            tuple_list: A list of tuples with the string and index
+        """
         tuple_list = []
         for index, item in enumerate(data):
             tuple_list.append((item, index))
@@ -41,6 +80,17 @@ class Node:
         self.print_range = []
 
     def get_children(self, line_list, line_no=0):
+        """
+        Find the children of a parent node by traversing the output log
+        Parameters:
+                line_list: A list of lines from the output log
+            optional:
+                line_no: The position of the cursor in the line list
+        Exception:
+            None
+        Returns:
+            line_no: The position of the cursor in the line list
+        """
 
         while True:
 
@@ -82,6 +132,18 @@ class Node:
         return line_no
 
     def compile_tree(self, print_no=0, prefix=""):
+        """
+        Recursively compile a list of formatted strings which are the printed tree
+        Parameters:
+            Optional
+                print_no: the line number of the print
+                prefix: used in the formatting of each string
+        Exception:
+            None
+        Returns:
+            print_list: A list of printed strings
+            print_no: used in the recursion
+        """
         # If the node is not opened then dont give any children
         print_list = []
         self.print_range = [print_no]
@@ -104,27 +166,35 @@ class Node:
         return print_list, print_no
 
     def find_node(self, index):
+        """
+        Recursively find the node with the matching print index then toggle opened
+        Parameters:
+            index: The index in which to find the node
+        Exception:
+            None
+        Returns:
+            None
+        """
         if self.print_range[0] == index:
             self.toggle_opened()
-            return
         else:
             for child in self.children:
                 child.find_node(index)
 
-    def get_value(self):
-        return self.value
-
-    def set_print_range(self, print_range):
-        self.print_range = print_range
-
-    def set_output(self, output):
-        self.output = output
-
-    def set_value(self, value):
-        self.value = value
-
     def toggle_opened(self):
+        """
+        Toggles the boolean value of the opened attribute
+        Parameters:
+            None
+        Exception:
+            None
+        Returns:
+            None
+        """
         if self.opened:
             self.opened = False
         else:
             self.opened = True
+
+    def set_output(self, value):
+        self.output = value
