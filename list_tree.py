@@ -5,20 +5,6 @@ class LogLister:
         self.path = path
         self.create_tree()
 
-    def generate_data(self):
-        """
-        Formats the tree into strings with line numbers
-        Parameters:
-            None
-        Exception:
-            None
-        Returns:
-            List of tuples
-        """
-        data_list = self.genesis.compile_tree()[0]
-        tuple_list = self._data_to_tuple(data_list)
-        return tuple_list
-
     def create_tree(self):
         """
         Creates a genesis Node in which the tree is stored
@@ -34,8 +20,24 @@ class LogLister:
         self.genesis = Node("File", 0)
         self.genesis.get_children(line_list)
 
+    def generate_data(self):
+        """
+        Formats the tree into strings with line numbers
+        Parameters:
+            None
+        Exception:
+            None
+        Returns:
+            List of tuples
+        """
+        data_list = self.genesis.compile_tree()[0]
+        prefixed_data_list = self._fill_list(data_list)
+        tuple_list = self._data_to_tuple(prefixed_data_list)
+        return tuple_list
+
     def find_node_toggle_collapse(self, index):
         """
+        Find the node with the given index and toggle collapse
         Parameters:
             Index of node to be collapsed
         Exception:
@@ -44,9 +46,7 @@ class LogLister:
             New list of tuples with collapsed node
         """
         self.genesis.find_node(index)
-        new_data = self.genesis.compile_tree()[0]
-        tuple_list = self._data_to_tuple(new_data)
-        return tuple_list
+        return self.generate_data()
 
     def print_data(self, data):
         """
@@ -54,6 +54,25 @@ class LogLister:
         """
         for line in data:
             print(line[0])
+
+    def _fill_list(self, printed_list):
+        """
+        Find the highest index in the list and adds prefixes whitespace.
+        Parameters:
+            printed_list: The list of printed nodes
+        Exception:
+            None
+        Returns:
+            printed_list: The list of printed nodes with the whitespace prefixed
+        """
+        highest_index = len(printed_list) - 1
+        whitespace = " "
+        for line in printed_list:
+            index = printed_list.index(line)
+            diff = len(str(highest_index)) - len(str(index))
+            prefix = whitespace * diff
+            printed_list[index] = prefix + printed_list[index]
+        return printed_list
 
     def _data_to_tuple(self, data):
         """
@@ -148,11 +167,13 @@ class Node:
         print_list = []
         self.print_range = [print_no]
         if self.opened:
-            print_list.append(f"{print_no} {prefix}▼ {self.value}")
+            print_list.append(
+                f"{print_no} {prefix}▼ {self.value}")
             print_no += 1
             prefix += "  "
             if self.output:
-                print_list.append(f"{print_no} {prefix}  {self.output}")
+                print_list.append(
+                    f"{print_no} {prefix}  {self.output}")
                 print_no += 1
             if self.opened:
                 for child in self.children:
@@ -160,7 +181,8 @@ class Node:
                         print_no, prefix)
                     print_list += return_list
         else:
-            print_list.append(f"{print_no} {prefix}▶ {self.value}")
+            print_list.append(
+                f"{print_no} {prefix}▶ {self.value}")
             print_no += 1
         self.print_range.append(print_no)
         return print_list, print_no
